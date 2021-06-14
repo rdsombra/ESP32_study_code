@@ -1,49 +1,42 @@
-/*************************************************************
- * This is an study code to create tasks.
- * Here I will show to create tasks on FreeRTOS
- * by: Rafael Sombra
- * ***********************************************************/
-
 #include <Arduino.h>
-/*to access FreeRTOS's interfaces*/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-/*pin map for ESP32 DOIT devkit*/
+/*pin mapping*/ 
 #define LED 2
 
-/*variables to hold task handles */
-TaskHandle_t task1Handle = NULL;
-TaskHandle_t task2Handle = NULL;
+TaskHandle_t taks1Handle = NULL;
+TaskHandle_t taks2Handle = NULL;
 
-/*task prototypes */
+/*Task prototypes*/
 void vTask1(void *pvParameters);
 void vTask2(void *pvParameters);
 
-void setup() { 
+void setup() {
   Serial.begin(9600);
-  pinMode(LED, OUTPUT);
-
-  xTaskCreate(vTask1, "TASK1", configMINIMAL_STACK_SIZE, NULL, 1, &task1Handle);
-  xTaskCreate(vTask1, "TASK1", configMINIMAL_STACK_SIZE+1024, NULL, 2, &task1Handle);
+  xTaskCreate(vTask1,"TASK1",configMINIMAL_STACK_SIZE,NULL,1,&taks1Handle);
+  xTaskCreate(vTask2,"TASK2",configMINIMAL_STACK_SIZE+1024,NULL,2,&taks1Handle);
 }
 
 void loop() {
-  vTaskDelay(3000);
+  /*frees CPU for 3 sec*/
+  vTaskDelay(3000); 
 }
 
-void vTask1(void *pvParameters){
-  for (;;){
-    digitalWrite(LED,!digitalRead(LED));
-    vTaskDelay(pdMS_TO_TICKS(200));
-  }
-};
+/* vTask1: inverts the LED state*/
+void vTask1(void *pvParameters) {
+    pinMode(LED,OUTPUT);
+    while (1){
+      digitalWrite(LED,!digitalRead(LED));
+      vTaskDelay(pdMS_TO_TICKS(200));
+    }
+}
 
+/* vTask2: prints count value each second*/
 void vTask2(void *pvParameters){
-  int count=0;
-  while(1){
-    /*print on serial port*/
-    Serial.println("Task2: " + String(count++));
+  int cont = 0;
+  while (1){
+    Serial.println("Task 2: " + String(cont++));
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
-};
+}
