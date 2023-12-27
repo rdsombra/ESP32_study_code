@@ -14,6 +14,8 @@ void vTask2(void *pvParameters);
 
 void setup() {
   Serial.begin(9600);
+
+  /*creating 2 tasks and setting their priority*/
   xTaskCreate(vTask1,"TASK1",configMINIMAL_STACK_SIZE,NULL,1,&task1Handle);
   xTaskCreate(vTask2,"TASK2",configMINIMAL_STACK_SIZE+1024,NULL,2,&task2Handle);
 }
@@ -28,7 +30,7 @@ void vTask1(void *pvParameters) {
     pinMode(LED,OUTPUT);
     while (1){
       digitalWrite(LED,!digitalRead(LED));
-      vTaskDelay(pdMS_TO_TICKS(200));
+      vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
