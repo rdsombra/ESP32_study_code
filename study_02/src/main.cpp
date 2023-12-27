@@ -9,8 +9,8 @@
 /*pin mapping*/ 
 #define LED 2
 
-TaskHandle_t task1Handle = NULL;
-TaskHandle_t task2Handle = NULL;
+TaskHandle_t xTask1Handle = NULL;
+TaskHandle_t xTask2Handle = NULL;
 
 /*Task prototypes*/
 void vTask1(void *pvParameters);
@@ -18,8 +18,8 @@ void vTask2(void *pvParameters);
 
 void setup() {
   Serial.begin(9600);
-  xTaskCreate(vTask1,"TASK1",configMINIMAL_STACK_SIZE,NULL,1,&task1Handle);
-  xTaskCreate(vTask2,"TASK2",configMINIMAL_STACK_SIZE+1024,NULL,2,&task2Handle);
+  xTaskCreate(vTask1,"TASK1",configMINIMAL_STACK_SIZE,NULL,1,&xTask1Handle);
+  xTaskCreate(vTask2,"TASK2",configMINIMAL_STACK_SIZE+1024,NULL,2,&xTask2Handle);
 }
 
 void loop() {
@@ -43,15 +43,15 @@ void vTask2(void *pvParameters){
   while (1){
     Serial.println("Task 2: " + String(count++));
     if(count == 10){
-      if (NULL != task1Handle){
+      if (NULL != xTask1Handle){
         Serial.println("Deleting task1");
-        vTaskDelete(task1Handle);
+        vTaskDelete(xTask1Handle);
         digitalWrite(LED, LOW);
-        task1Handle = NULL;
+        xTask1Handle = NULL;
       }
     }
     if(count == 15){
-      vTaskDelete(task2Handle);
+      vTaskDelete(xTask2Handle);
     }
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
