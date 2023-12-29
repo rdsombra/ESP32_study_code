@@ -1,10 +1,16 @@
+/*** 
+* Demonstrating how to add values to a queue from a ISR. 
+* By Rafael Sombra.
+***/
+
 #include <Arduino.h>
-#include "FreeRTOS.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+/* pin definition according w/ the board used: ESP32 Doit Devkit v1. */
 #define LED 2
-#define BT 12
+#define BUTTON 12
 
 QueueHandle_t xQ;
 TaskHandle_t xTask1Handler;
@@ -20,8 +26,11 @@ void TreatISR_BT(){
 void setup() {
   Serial.begin(9600);
   pinMode(LED, OUTPUT);
-  pinMode(BT, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BT), TreatISR_BT, FALLING);
+  pinMode(BUTTON, INPUT_PULLUP);
+
+  /* Creating ISR from the button press, 
+  * triggered by the falling edge of the signal. */
+  attachInterrupt(digitalPinToInterrupt(BUTTON), TreatISR_BT, FALLING);
 
   xQ = xQueueCreate(5, sizeof(int));
     if (NULL == xQ){
