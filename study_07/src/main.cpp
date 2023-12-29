@@ -46,6 +46,8 @@ void loop() {
   vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
+/* adds a value to the queue each 500ms. 
+* Resets the counter after 10 rounds and wait 5 sec. */
 void vTask1(void *pvParameters){
   int count = 0;
   while(1){
@@ -55,12 +57,14 @@ void vTask1(void *pvParameters){
     }
     else{
       count = 0;
+      /* triggers a timeout on task2. */
       vTaskDelay(pdMS_TO_TICKS(5000));
     }
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 
+/* Reads the values from the queue every 1 second. */
 void vTask2(void *pvParameters){
   int received_value = 0;
   while(1){
