@@ -1,7 +1,7 @@
 /*
 *This code is a study of binary semaphores on FreeRTOS.
-*I'm using a binary semaphore to trigger an analog read
-*on pin 34 everytime the loop taks inverts LED status and
+*I'm using a binary semaphore to trigger an analog read of a pontenciometer
+*plugged on pin 34 everytime the loop taks inverts LED status and
 *frees the semaphore.
 *by: Rafael Sombra.
 */
@@ -47,6 +47,6 @@ void vTaskADC(void *pvParameters){
     xSemaphoreTake(xBinSemaphore, portMAX_DELAY);
     /*doing an analog reading everytime the semaphore is free to go*/
     adcValue = analogRead(ANALOG_INPUT);
-    Serial.println("ADC Value: "+ String(adcValue));
+    Serial.println("ADC Value: "+ String(adcValue)+"\n");
   }
 }
