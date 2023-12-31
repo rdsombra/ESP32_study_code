@@ -1,5 +1,7 @@
 /*This code intends to show how to work with binary semaphores
-*on interruptions - ISR
+* on interruptions - ISR. Everytime an ISR occurs, a higher priority task
+* is called and the counter of triggers (from button) is printed on the 
+* serial output.
 *by Rafael Sombra.
 */
 #include <Arduino.h>
@@ -9,7 +11,7 @@
 #include "freertos/semphr.h"
 
 #define LED 2
-#define BT 12
+#define BUTTON 12
 
 SemaphoreHandle_t xBinSemaphore;
 TaskHandle_t xTaskTreatButtonHandler;
@@ -30,20 +32,20 @@ void ISR_CallBack(){
 void setup() {
   Serial.begin(9600);
   pinMode(LED, OUTPUT);
-  pinMode(BT, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BT), ISR_CallBack, FALLING);
+  pinMode(BUTTON, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(BUTTON), ISR_CallBack, FALLING);
 
   xBinSemaphore = xSemaphoreCreateBinary();
-  xTaskCreate(vTaskTreatButton, "Task BT", configMINIMAL_STACK_SIZE + 1024,
+  /*Creating task w/ higher priority.*/
+  xTaskCreate(vTaskTreatButton, "Task Button", configMINIMAL_STACK_SIZE + 1024,
               NULL, 3, &xTaskTreatButtonHandler);
   
 }
 
 void loop() {
-  digitalWrite(LED, HIGH);
-  vTaskDelay(pdMS_TO_TICKS(100));
-  digitalWrite(LED, LOW);
-  vTaskDelay(pdMS_TO_TICKS(900));
+  /* Using the loop only to invert the LED state.*/
+  digitalWrite(LED, !digitalRead(LED));
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 
@@ -53,7 +55,6 @@ void vTaskTreatButton(void *pvParameters){
   int counter = 0;
   while(1){
     xSemaphoreTake(xBinSemaphore, portMAX_DELAY);
-    Serial.println("conter: "+ String(counter++));
-
+    Serial.println("counter: " +String(counter++) +"\n");
   }
 }
