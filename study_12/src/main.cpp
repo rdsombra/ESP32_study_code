@@ -12,33 +12,25 @@
 
 #define LED 2
 
-SemaphoreHandle_t mutex_smp;
-TaskHandle_t Task1Handler, Task2Handler;
+SemaphoreHandle_t xSemphrMutexHandle;
+TaskHandle_t xTask1Handler, xTask2Handler;
 
 void vTask1(void *pvParameters);
 void vTask2(void *pvParameters);
-void vSendInfo(int c){
-  xSemaphoreTake(mutex_smp, portMAX_DELAY);
-  Serial.println("Sending info from Task: " + String(c));
-  delay(1000);
-  xSemaphoreGive(mutex_smp);
-}
-
+void vSendInfo(int c);
 
 void setup() {
   Serial.begin(9600);
   pinMode(LED, OUTPUT);
 
-  mutex_smp = xSemaphoreCreateMutex();
-  xTaskCreate(vTask1, "vTask1", configMINIMAL_STACK_SIZE+1024, NULL, 1, &Task1Handler);
-  xTaskCreate(vTask2, "vTask2", configMINIMAL_STACK_SIZE+1024, NULL, 3, &Task2Handler);
+  xSemphrMutexHandle = xSemaphoreCreateMutex();
+  xTaskCreate(vTask1, "vTask1", configMINIMAL_STACK_SIZE+1024, NULL, 1, &xTask1Handler);
+  xTaskCreate(vTask2, "vTask2", configMINIMAL_STACK_SIZE+1024, NULL, 3, &xTask2Handler);
 }
 
 void loop() {
-  digitalWrite(LED, HIGH);
-  vTaskDelay(200);
-  digitalWrite(LED, LOW);
-  vTaskDelay(800);
+  digitalWrite(LED, !digitalRead(LED));
+  vTaskDelay(500);
 }
 
 void vTask1(void *pvParameters){
@@ -51,7 +43,13 @@ void vTask1(void *pvParameters){
 void vTask2(void *pvParameters){
   while(1){
     vSendInfo(2);
-    /*needed to free CPU use and allow the other task to get it*/
     vTaskDelay(10);
   }
+}
+
+void vSendInfo(int c){
+  xSemaphoreTake(xSemphrMutexHandle, portMAX_DELAY);
+  Serial.println("Sending info from Task: " + String(c));
+  delay(1000);
+  xSemaphoreGive(xSemphrMutexHandle);
 }
